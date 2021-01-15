@@ -1,7 +1,7 @@
 version: 2.1
 
 jobs:
-  build:
+  build-controller:
     machine:
         enabled: true
         image: ubuntu-1604:202007-01
