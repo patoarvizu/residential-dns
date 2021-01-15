@@ -47,7 +47,9 @@ func main() {
 		i := &sts.GetCallerIdentityInput{}
 		r, err := stsSvc.GetCallerIdentity(i)
 		if err != nil {
-			panic(err)
+			fmt.Printf("Error: %v", err)
+			time.Sleep(time.Duration(cfg.syncPeriodMinutes) * time.Minute)
+			continue
 		}
 		fmt.Printf("Identity: %v", r)
 		r53 := route53.New(awsSession)
@@ -73,7 +75,7 @@ func main() {
 		}
 		_, err = r53.ChangeResourceRecordSets(input)
 		if err != nil {
-			panic(err)
+			fmt.Printf("Error: %v", err)
 		}
 		time.Sleep(time.Duration(cfg.syncPeriodMinutes) * time.Minute)
 	}
