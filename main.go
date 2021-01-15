@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/route53"
+	"github.com/aws/aws-sdk-go/service/sts"
 )
 
 type residentialDNSConfig struct {
@@ -41,10 +42,14 @@ func main() {
 			panic(err)
 		}
 		fmt.Printf("IP found: %s\n", ip)
-		awsSession, err := session.NewSession()
+		awsSession := session.Must(session.NewSession())
+		stsSvc := sts.New(session.New())
+		i := &sts.GetCallerIdentityInput{}
+		r, err := stsSvc.GetCallerIdentity(i)
 		if err != nil {
 			panic(err)
 		}
+		fmt.Printf("Identity: %v", r)
 		r53 := route53.New(awsSession)
 		input := &route53.ChangeResourceRecordSetsInput{
 			ChangeBatch: &route53.ChangeBatch{
