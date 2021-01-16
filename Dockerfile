@@ -13,7 +13,7 @@ COPY main.go main.go
 
 RUN CGO_ENABLED=0 GOOS=linux GOARM=$(if [ "$TARGETVARIANT" = "v7" ]; then echo "7"; fi) GOARCH=$TARGETARCH GO111MODULE=on go build -a -o residential-dns main.go
 
-FROM alpine:3.13.0
+FROM gcr.io/distroless/static:nonroot-amd64
 
 ARG GIT_COMMIT="unspecified"
 LABEL GIT_COMMIT=$GIT_COMMIT
@@ -32,5 +32,6 @@ LABEL SIGNATURE_KEY=$SIGNATURE_KEY
 
 WORKDIR /
 COPY --from=builder /workspace/residential-dns .
+USER nonroot:nonroot
 
 ENTRYPOINT ["/residential-dns"]
