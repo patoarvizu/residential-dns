@@ -1,7 +1,7 @@
 version: 2.1
 
 jobs:
-  build:
+  build-controller:
     machine:
         enabled: true
         image: ubuntu-1604:202007-01
@@ -25,7 +25,7 @@ jobs:
           mkdir -p ${HOME}/go/bin
           echo 'export PATH="$GOPATH/bin:$PATH"' >> "${BASH_ENV}"
     - run:
-        name: Build webhook
+        name: Build controller
         command: |
           sudo apt-get update
           sudo apt-get install qemu-user -y

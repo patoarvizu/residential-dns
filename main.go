@@ -29,6 +29,7 @@ func main() {
 	fl.IntVar(&cfg.syncPeriodMinutes, "sync-period-minutes", 15, "The amount of time, in minutes, to wait between syncs")
 	fl.Parse(os.Args[1:])
 
+	route53Errors := 0
 	for {
 		url := "https://api.ipify.org?format=text"
 		resp, err := http.Get(url)
@@ -41,10 +42,7 @@ func main() {
 			panic(err)
 		}
 		fmt.Printf("IP found: %s\n", ip)
-		awsSession, err := session.NewSession()
-		if err != nil {
-			panic(err)
-		}
+		awsSession := session.Must(session.NewSession())
 		r53 := route53.New(awsSession)
 		input := &route53.ChangeResourceRecordSetsInput{
 			ChangeBatch: &route53.ChangeBatch{
@@ -68,7 +66,12 @@ func main() {
 		}
 		_, err = r53.ChangeResourceRecordSets(input)
 		if err != nil {
-			panic(err)
+			route53Errors++
+			if route53Errors == 3 {
+				panic(err)
+			} else {
+				fmt.Printf("Route 53 error: %v", err)
+			}
 		}
 		time.Sleep(time.Duration(cfg.syncPeriodMinutes) * time.Minute)
 	}
