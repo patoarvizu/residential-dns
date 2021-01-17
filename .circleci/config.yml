@@ -58,7 +58,7 @@ jobs:
           docker push patoarvizu/residential-dns:latest-arm7
           docker push patoarvizu/residential-dns:$CIRCLE_SHA1-arm7
           docker push patoarvizu/residential-dns:$VERSION-arm7
-          docker buildx build --progress=plain --platform=linux/amd64,linux/arm64,linux/arm/v7 --push $OPERATOR_BUILD_ARGS . -t patoarvizu/residential-dns:latest -t patoarvizu/residential-dns:$CIRCLE_SHA1 -t patoarvizu/residential-dns:$VERSION
+          docker buildx build --progress=plain --platform=linux/amd64,linux/arm64,linux/arm/v7 --push $DOCKER_BUILD_ARGS . -t patoarvizu/residential-dns:latest -t patoarvizu/residential-dns:$CIRCLE_SHA1 -t patoarvizu/residential-dns:$VERSION
           DIGEST=$(docker buildx imagetools inspect patoarvizu/residential-dns:$CIRCLE_SHA1 | grep Digest | cut -d':' -f3)
           LENGTH=$(( $(docker buildx imagetools inspect patoarvizu/residential-dns:$CIRCLE_SHA1 --raw | wc -c) - 1 ))
           export NOTARY_AUTH=$(echo $DOCKER_HUB_USER:$DOCKER_HUB_ACCESS_TOKEN | base64)
