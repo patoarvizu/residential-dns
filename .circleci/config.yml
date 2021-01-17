@@ -39,11 +39,16 @@ jobs:
           docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
           docker buildx create --name cci-builder --use
           docker login --username $DOCKER_HUB_USER --password $DOCKER_HUB_ACCESS_TOKEN
+          echo $ENCODED_NOTARY_ROLE_KEY | base64 -d > ${HOME}/residential-dns-circleci.key
+          export NOTARY_DELEGATION_PASSPHRASE=$NOTARY_ROLE_PASSPHRASE
+          notary -s https://notary.docker.io -d ~/.docker/trust key import ${HOME}/residential-dns-circleci.key --role residential-dns-circleci
+          export DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE=$NOTARY_DELEGATION_PASSPHRASE
           DOCKER_BUILD_ARGS="--build-arg GIT_COMMIT=$CIRCLE_SHA1 --build-arg GIT_TAG=$CIRCLE_TAG --build-arg COMMIT_TIMESTAMP=$(git log -1 --format=%at) --build-arg AUTHOR_EMAIL=$(git log -1 --format=%ae) --build-arg SIGNATURE_KEY=$(git log -1 --format=%GK)"
           VERSION=${CIRCLE_TAG:-latest}
           docker buildx build --progress=plain --platform=linux/amd64 --load $DOCKER_BUILD_ARGS -t patoarvizu/residential-dns:latest-amd64 -t patoarvizu/residential-dns:$CIRCLE_SHA1-amd64 -t patoarvizu/residential-dns:$VERSION-amd64 .
           docker buildx build --progress=plain --platform=linux/arm64 --load $DOCKER_BUILD_ARGS -t patoarvizu/residential-dns:latest-arm64 -t patoarvizu/residential-dns:$CIRCLE_SHA1-arm64 -t patoarvizu/residential-dns:$VERSION-arm64 .
           docker buildx build --progress=plain --platform=linux/arm/v7 --load $DOCKER_BUILD_ARGS -t patoarvizu/residential-dns:latest-arm7 -t patoarvizu/residential-dns:$CIRCLE_SHA1-arm7 -t patoarvizu/residential-dns:$VERSION-arm7 .
+          export DOCKER_CONTENT_TRUST=1
           docker push patoarvizu/residential-dns:latest-amd64
           docker push patoarvizu/residential-dns:$CIRCLE_SHA1-amd64
           docker push patoarvizu/residential-dns:$VERSION-amd64
@@ -56,6 +61,10 @@ jobs:
           docker buildx build --progress=plain --platform=linux/amd64,linux/arm64,linux/arm/v7 --push $OPERATOR_BUILD_ARGS . -t patoarvizu/residential-dns:latest -t patoarvizu/residential-dns:$CIRCLE_SHA1 -t patoarvizu/residential-dns:$VERSION
           DIGEST=$(docker buildx imagetools inspect patoarvizu/residential-dns:$CIRCLE_SHA1 | grep Digest | cut -d':' -f3)
           LENGTH=$(( $(docker buildx imagetools inspect patoarvizu/residential-dns:$CIRCLE_SHA1 --raw | wc -c) - 1 ))
+          export NOTARY_AUTH=$(echo $DOCKER_HUB_USER:$DOCKER_HUB_ACCESS_TOKEN | base64)
+          notary -s https://notary.docker.io -d ~/.docker/trust addhash -p docker.io/patoarvizu/residential-dns latest $LENGTH --sha256 $DIGEST -r targets/releases
+          notary -s https://notary.docker.io -d ~/.docker/trust addhash -p docker.io/patoarvizu/residential-dns $CIRCLE_SHA1 $LENGTH --sha256 $DIGEST -r targets/releases
+          notary -s https://notary.docker.io -d ~/.docker/trust addhash -p docker.io/patoarvizu/residential-dns $VERSION $LENGTH --sha256 $DIGEST -r targets/releases
         no_output_timeout: 30m
     - save_cache:
         key: residential-dns-golang-cache-{{ checksum "go.sum" }}
