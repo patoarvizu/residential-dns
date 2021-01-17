@@ -7,6 +7,7 @@ jobs:
         image: ubuntu-1604:202007-01
     environment:
       GOLANG_VERSION: 1.13.8
+      NOTARY_VERSION: 0.6.1
       GOPATH: /home/circleci/go
       GO111MODULE: "on"
       DOCKER_CLI_EXPERIMENTAL: enabled
@@ -24,6 +25,12 @@ jobs:
           sudo tar -C /usr/local -xzf go.linux-amd64.tar.gz
           mkdir -p ${HOME}/go/bin
           echo 'export PATH="$GOPATH/bin:$PATH"' >> "${BASH_ENV}"
+    - run:
+        name: Install notary
+        command: |
+          curl -L https://github.com/theupdateframework/notary/releases/download/v${NOTARY_VERSION}/notary-Linux-amd64 -o notary
+          chmod +x notary
+          sudo mv notary /usr/local/bin
     - run:
         name: Build controller
         command: |
