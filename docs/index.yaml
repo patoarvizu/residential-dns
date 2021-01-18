@@ -1,0 +1,12 @@
+apiVersion: v1
+entries:
+  residential-dns:
+  - apiVersion: v2
+    created: "2021-01-17T20:47:10.192018-05:00"
+    description: Residential DNS
+    digest: bbca7dc7d07a507fce03240e21c2fdd881d72396fadefd7fbddae04087ddda38
+    name: residential-dns
+    urls:
+    - https://patoarvizu.github.io/residential-dns/residential-dns-0.0.0.tgz
+    version: 0.0.0
+generated: "2021-01-17T20:47:10.189566-05:00"

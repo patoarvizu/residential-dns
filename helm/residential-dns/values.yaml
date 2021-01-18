@@ -1,0 +1,17 @@
+serviceAccount:
+  # serviceAccount.create -- Whether to create a ServiceAccount object and associate it with the Deployment.
+  create: true
+  # serviceAccount.name -- The name to use for the ServiceAccount object.
+  name: residential-dns
+  # serviceAccount.annotations -- A map of annotations to add to the ServiceAccount.
+  annotations:
+
+deployment:
+  # deployment.imageTag -- The residential-dns Docker image tag to run.
+  imageTag: v0.0.0
+  # deployment.podAnnotations -- A map of annotations to add to the pod spec template.
+  podAnnotations:
+  # deployment.args -- The list of arguments to pass to the controller.
+  args:
+  # deployment.env -- The list of environment variables to set on the pod spec template.
+  env:
