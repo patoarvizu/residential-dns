@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: residential-dns
+spec:
+  selector:
+    matchLabels:
+      app: residential-dns
+  template:
+    metadata:
+      labels:
+        app: residential-dns
+      {{- if .Values.deployment.podAnnotations }}
+      annotations: {{ toYaml .Values.deployment.podAnnotations | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      {{- end }}
+      containers:
+      - name: residential-dns
+        image: patoarvizu/residential-dns:{{ .Values.deployment.imageTag }}
+        command:
+        - /residential-dns
+        args: {{ required "The residential-dns controller needs arguments!" .Values.deployment.args | toYaml | nindent 8 }}
+        {{- if .Values.deployment.env }}
+        env: {{ toYaml .Values.deployment.env | nindent 8 }}
+        {{- end }}
