@@ -10,6 +10,8 @@
     - [WARNING](#warning)
   - [Arguments](#arguments)
   - [Credentials](#credentials)
+    - [`-provider=route53`](#-providerroute53)
+    - [`-provider=cloudflare`](#-providercloudflare)
   - [For security nerds](#for-security-nerds)
     - [Docker images are signed and published to Docker Hub's Notary server](#docker-images-are-signed-and-published-to-docker-hubs-notary-server)
     - [Docker images are labeled with Git and GPG metadata](#docker-images-are-labeled-with-git-and-gpg-metadata)
@@ -19,7 +21,7 @@
 
 ## Intro
 
-This is a simple controller, that discovers the public IP address of the node where it's running from (using the [ipify API](https://www.ipify.org/)), and creates a Route 53 `A` record pointing to that public IP address.
+This is a simple controller, that discovers the public IP address of the node where it's running from (using the [ipify API](https://www.ipify.org/)), and creates an `A` record pointing to that public IP address. It currently supports two DNS providers: Route 53 and Cloudflare.
 
 The value of the controller is to create a consistent hostname that can be used in cases where acquiring a fixed IP address is not practical.
 
@@ -31,18 +33,29 @@ Exposing your home network to the internet will always be a risk. Only use this 
 
 ## Arguments
 
-Command-line argument  | Default | Description
------------------------|---------|------------
-`-hosted-zone-id`      |         | Route 53 hosted zone id
-`-record-name`         |         | DNS record name
-`-ttl`                 |      60 | DNS record TTL
-`-sync-period-minutes` |      15 | The amount of time, in minutes, to wait between syncs
+Command-line argument     | Default | Description
+--------------------------|---------|------------
+`-provider`               |         | DNS provider where the record will be created. Valid values are: `route53` and `cloudflare`
+`-route53-hosted-zone-id` |         | Route 53 hosted zone id
+`-cloudflare-zone-name`   |         | Cloudflare zone name
+`-cloudflare-proxied`     | `false` | Set to true if Cloudflare requests to this hostname will be proxied through Cloudflare
+`-record-name`            |         | DNS record name
+`-ttl`                    |      60 | DNS record TTL
+`-sync-period-minutes`    |      15 | The amount of time, in minutes, to wait between syncs
 
 ## Credentials
+
+### `-provider=route53`
 
 The controller will need AWS credentials and will discover them using the [default credential provider chain](https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html), so they can either use static credentials provisioned manually, or another dynamic credential injection mechanism, such as Vault's [AWS Secrets Engine](https://www.vaultproject.io/docs/secrets/aws), [kube2iam](https://github.com/jtblin/kube2iam), [kiam](https://github.com/uswitch/kiam), etc., depending on the runtime.
 
 The only permission required is `route53:ChangeResourceRecordSets`.
+
+### `-provider=cloudflare`
+
+The Cloudflare credentials are injected via environment variables. The controller only supports Cloudflare API tokens (as opposed to email/token combinations). The environment variable `CLOUDFLARE_API_TOKEN` should be set to the value of the token to be used.
+
+It should have Edit - DNS Zone permissions.
 
 ## For security nerds
 
