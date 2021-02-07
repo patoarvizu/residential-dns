@@ -94,17 +94,31 @@ func main() {
 				providerErrors++
 				continue
 			}
-			_, err = api.CreateDNSRecord(id, cloudflare.DNSRecord{
+			record := cloudflare.DNSRecord{
 				Type:    "A",
 				Name:    cfg.recordName,
 				Content: string(ip),
 				TTL:     int(cfg.ttl),
 				Proxied: cfg.cloudflareProxied,
+			}
+			existing, err := api.DNSRecords(id, cloudflare.DNSRecord{
+				Type: "A",
+				Name: cfg.recordName,
 			})
-			if err != nil {
-				fmt.Printf("Cloudflare error: %v", err)
-				providerErrors++
-				continue
+			if len(existing) == 1 {
+				err = api.UpdateDNSRecord(id, existing[0].ID, record)
+				if err != nil {
+					fmt.Printf("Cloudflare error: %v", err)
+					providerErrors++
+					continue
+				}
+			} else {
+				_, err = api.CreateDNSRecord(id, record)
+				if err != nil {
+					fmt.Printf("Cloudflare error: %v", err)
+					providerErrors++
+					continue
+				}
 			}
 		}
 		time.Sleep(time.Duration(cfg.syncPeriodMinutes) * time.Minute)
