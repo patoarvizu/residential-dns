@@ -3,8 +3,8 @@ version: 2.1
 jobs:
   build-controller:
     machine:
-        enabled: true
-        image: ubuntu-1604:202007-01
+      enabled: true
+      image: ubuntu-2004:202111-02
     environment:
       GOLANG_VERSION: 1.13.8
       NOTARY_VERSION: 0.6.1
