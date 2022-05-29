@@ -25,7 +25,7 @@ variable create_namespace {
 
 variable namespace_name {
   type = string
-  default = "vault"
+  default = "residential-dns"
   description = "The name of the namespace to create or look up."
 }
 
