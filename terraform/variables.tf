@@ -38,6 +38,16 @@ variable env_vars {
   description = "Environment variables to run residential-dns with."
 }
 
+variable env_from_vars {
+  type = list(object({
+    name = string
+    secret_ref_key = string
+    secret_ref_name = string
+  }))
+  default = []
+  description = "Optional environment variables to reference Kubernetes Secrets to run residential-dns with."
+}
+
 variable deployment_annotations {
   type = map
   default = {}
