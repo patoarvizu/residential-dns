@@ -32,6 +32,18 @@ resource kubernetes_deployment residential_dns {
               value = env.value["value"]
             }
           }
+          dynamic "env" {
+            for_each = var.env_from_vars
+            content {
+              name = env.value["name"]
+              value_from {
+                secret_key_ref {
+                  key = env.value["secret_ref_key"]
+                  name = env.value["secret_ref_name"]
+                }
+              }
+            }
+          }
         }
       }
     }
